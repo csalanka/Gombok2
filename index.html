@@ -304,6 +304,10 @@
                 </select>
             </div>
             <div class="control-group">
+                <label for="logoFontSize">Betűméret (px):</label>
+                <input type="number" id="logoFontSize" value="40" min="10" max="100">
+            </div>
+            <div class="control-group">
                 <label for="textColorLogo">Szövegszín:</label>
                 <input type="color" id="textColorLogo" value="#ffffff">
             </div>
@@ -494,6 +498,7 @@
         const logoSizeInput = document.getElementById("logoSize");
         const logoTextInput = document.getElementById("logoText");
         const logoFontInput = document.getElementById("logoFont");
+        const logoFontSizeInput = document.getElementById("logoFontSize");
         const textColorInput = document.getElementById("textColorLogo");
         const bgColorInput = document.getElementById("bgColorLogo");
         const borderTypeInput = document.getElementById("borderType");
@@ -505,6 +510,7 @@
             const size = parseInt(logoSizeInput.value);
             const text = logoTextInput.value;
             const font = logoFontInput.value;
+            const fontSize = parseInt(logoFontSizeInput.value);
             const textColor = textColorInput.value;
             const bgColor = bgColorInput.value;
             const borderType = borderTypeInput.value;
@@ -532,7 +538,7 @@
 
             // Szöveg rajzolása
             logoCtx.fillStyle = textColor;
-            logoCtx.font = `${size / 5}px ${font}`;
+            logoCtx.font = `${fontSize}px ${font}`;
             logoCtx.textAlign = "center";
             logoCtx.textBaseline = "middle";
             logoCtx.fillText(text, size / 2, size / 2);
@@ -554,6 +560,7 @@
         logoSizeInput.addEventListener("input", updateLogoPreview);
         logoTextInput.addEventListener("input", updateLogoPreview);
         logoFontInput.addEventListener("change", updateLogoPreview);
+        logoFontSizeInput.addEventListener("input", updateLogoPreview);
         textColorInput.addEventListener("change", updateLogoPreview);
         bgColorInput.addEventListener("change", updateLogoPreview);
         borderTypeInput.addEventListener("change", updateLogoPreview);
