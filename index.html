@@ -422,17 +422,31 @@
         const canvas = document.getElementById("iconPreview");
         const ctx = canvas.getContext("2d");
 
+        // Alapértelmezett vászon inicializálása
+        function initializeCanvas() {
+            const size = parseInt(iconSizeInput.value);
+            canvas.width = size;
+            canvas.height = size;
+            ctx.clearRect(0, 0, size, size);
+            ctx.fillStyle = "#3c3c3c";
+            ctx.fillRect(0, 0, size, size);
+            ctx.fillStyle = "#e0e0e0";
+            ctx.font = "16px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("Kép feltöltéséhez kattints ide", size / 2, size / 2);
+        }
+
+        // Kép előnézet frissítése
         function updatePreview() {
             const file = imageUpload.files[0];
             const size = parseInt(iconSizeInput.value);
             const color = colorFilterInput.value;
             const isCircle = circleShapeCheckbox.checked;
 
-            // Ha nincs feltöltött kép, töröljük a vásznat
+            // Ha nincs feltöltött kép, inicializáljuk a vásznat
             if (!file) {
-                canvas.width = size;
-                canvas.height = size;
-                ctx.clearRect(0, 0, size, size);
+                initializeCanvas();
                 return;
             }
 
@@ -479,6 +493,10 @@
                 }
                 ctx.putImageData(imageData, 0, 0);
             };
+            img.onerror = function () {
+                alert("Hiba történt a kép betöltése során. Kérlek, próbálj meg egy másik képet feltölteni!");
+                initializeCanvas();
+            };
             img.src = URL.createObjectURL(file);
         }
 
@@ -499,6 +517,9 @@
         iconSizeInput.addEventListener("input", updatePreview);
         colorFilterInput.addEventListener("change", updatePreview);
         circleShapeCheckbox.addEventListener("change", updatePreview);
+
+        // Kezdeti vászon inicializálása
+        initializeCanvas();
 
         // Logó Tervező logika
         const logoSizeInput = document.getElementById("logoSize");
@@ -593,6 +614,10 @@
             // Ha az Ikontár lapra váltunk, frissítsük az előnézetet
             if (tabName === "iconLibrary") {
                 updatePreview();
+            }
+            // Ha a Logó Tervező lapra váltunk, frissítsük az előnézetet
+            if (tabName === "logoDesigner") {
+                updateLogoPreview();
             }
         }
     </script>
