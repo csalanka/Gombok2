@@ -248,8 +248,8 @@
         <div id="iconLibrary" class="tab-content">
             <h3>Saját Ikon Készítő</h3>
             <div class="control-group">
-                <label>Alap logó:</label>
-                <img src="siemens-energy-logo.png" id="baseLogo" style="width: 100px; height: auto;">
+                <label for="imageUpload">Kép feltöltése:</label>
+                <input type="file" id="imageUpload" accept="image/*">
             </div>
             <div class="control-group">
                 <label for="iconSize">Ikon mérete (px):</label>
@@ -304,7 +304,7 @@
                 </select>
             </div>
             <div class="control-group">
-                <label for="textColor">Szövegszín:</label>
+                <label for="textColorLogo">Szövegszín:</label>
                 <input type="color" id="textColorLogo" value="#ffffff">
             </div>
             <div class="control-group">
@@ -411,83 +411,84 @@
         updateButton();
 
         // Ikonkészítő logika
+        const imageUpload = document.getElementById("imageUpload");
         const iconSizeInput = document.getElementById("iconSize");
         const colorFilterInput = document.getElementById("colorFilter");
         const circleShapeCheckbox = document.getElementById("circleShape");
         const canvas = document.getElementById("iconPreview");
         const ctx = canvas.getContext("2d");
-        const baseLogo = document.getElementById("baseLogo");
 
         function updatePreview() {
+            const file = imageUpload.files[0];
             const size = parseInt(iconSizeInput.value);
             const color = colorFilterInput.value;
             const isCircle = circleShapeCheckbox.checked;
 
-            const img = new Image();
-            img.onload = function () {
-                canvas.width = size;
-                canvas.height = size;
+            if (file) {
+                const img = new Image();
+                img.onload = function () {
+                    canvas.width = size;
+                    canvas.height = size;
 
-                // Háttér kitöltése (átlátszó)
-                ctx.clearRect(0, 0, size, size);
+                    // Háttér kitöltése (átlátszó)
+                    ctx.clearRect(0, 0, size, size);
 
-                // Ha kör alakú, akkor maszkolás
-                if (isCircle) {
-                    ctx.beginPath();
-                    ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
-                    ctx.closePath();
-                    ctx.clip();
-                }
-
-                // Kép középre méretezve
-                const scale = Math.min(size / img.width, size / img.height);
-                const width = img.width * scale;
-                const height = img.height * scale;
-                const x = (size - width) / 2;
-                const y = (size - height) / 2;
-                ctx.drawImage(img, x, y, width, height);
-
-                // Színmódosítás (szűrő alkalmazása)
-                const imageData = ctx.getImageData(0, 0, size, size);
-                const data = imageData.data;
-                const hexToRgb = hex => {
-                    const r = parseInt(hex.slice(1, 3), 16);
-                    const g = parseInt(hex.slice(3, 5), 16);
-                    const b = parseInt(hex.slice(5, 7), 16);
-                    return { r, g, b };
-                };
-                const { r, g, b } = hexToRgb(color);
-                for (let i = 0; i < data.length; i += 4) {
-                    if (data[i + 3] > 0) {
-                        data[i] = r;
-                        data[i + 1] = g;
-                        data[i + 2] = b;
+                    // Ha kör alakú, akkor maszkolás
+                    if (isCircle) {
+                        ctx.beginPath();
+                        ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+                        ctx.closePath();
+                        ctx.clip();
                     }
-                }
-                ctx.putImageData(imageData, 0, 0);
-            };
-            img.src = baseLogo.src;
+
+                    // Kép középre méretezve
+                    const scale = Math.min(size / img.width, size / img.height);
+                    const width = img.width * scale;
+                    const height = img.height * scale;
+                    const x = (size - width) / 2;
+                    const y = (size - height) / 2;
+                    ctx.drawImage(img, x, y, width, height);
+
+                    // Színmódosítás (szűrő alkalmazása)
+                    const imageData = ctx.getImageData(0, 0, size, size);
+                    const data = imageData.data;
+                    const hexToRgb = hex => {
+                        const r = parseInt(hex.slice(1, 3), 16);
+                        const g = parseInt(hex.slice(3, 5), 16);
+                        const b = parseInt(hex.slice(5, 7), 16);
+                        return { r, g, b };
+                    };
+                    const { r, g, b } = hexToRgb(color);
+                    for (let i = 0; i < data.length; i += 4) {
+                        if (data[i + 3] > 0) {
+                            data[i] = r;
+                            data[i + 1] = g;
+                            data[i + 2] = b;
+                        }
+                    }
+                    ctx.putImageData(imageData, 0, 0);
+                };
+                img.src = URL.createObjectURL(file);
+            }
         }
 
         function downloadIcon() {
             if (canvas.width === 0 || canvas.height === 0) {
-                alert("Kérlek, állítsd be a méretet!");
+                alert("Kérlek, tölts fel egy képet és állítsd be a méretet!");
                 return;
             }
 
             const link = document.createElement("a");
-            link.download = "custom-siemens-icon.png";
+            link.download = "custom-icon.png";
             link.href = canvas.toDataURL("image/png");
             link.click();
         }
 
         // Eseménykezelők
+        imageUpload.addEventListener("change", updatePreview);
         iconSizeInput.addEventListener("input", updatePreview);
         colorFilterInput.addEventListener("change", updatePreview);
         circleShapeCheckbox.addEventListener("change", updatePreview);
-
-        // Kezdeti előnézet
-        updatePreview();
 
         // Logó Tervező logika
         const logoSizeInput = document.getElementById("logoSize");
@@ -531,7 +532,7 @@
 
             // Szöveg rajzolása
             logoCtx.fillStyle = textColor;
-            logoCtx.font = `${size / 5}px ${font}`; // A betűméret a vászon méretének 1/5-e
+            logoCtx.font = `${size / 5}px ${font}`;
             logoCtx.textAlign = "center";
             logoCtx.textBaseline = "middle";
             logoCtx.fillText(text, size / 2, size / 2);
